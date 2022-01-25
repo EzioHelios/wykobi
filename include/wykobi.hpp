@@ -36,7 +36,6 @@
 #include <vector>
 #include <cassert>
 #include <iomanip>
-#include <Eigen/Dense>
 #include "wykobi_math.hpp"
 
 #ifndef CURRENT_FUNCTION
@@ -124,7 +123,6 @@ namespace wykobi
       point2d() : x(T(0.0)), y(T(0.0)){}
       point2d(T _x, T _y) : x(_x), y(_y) {}
       point2d(const pointnd<T,2>& point) : x(point[0]), y(point[1]){}
-      point2d(const Eigen::Vector2d& p) : x(static_cast<T>(p(0))), y(static_cast<T>(p(1))) {}
      ~point2d(){}
 
       inline point2d<T>& operator=(const pointnd<T,2>& point)
@@ -132,13 +130,6 @@ namespace wykobi
          x = point[0];
          y = point[1];
          return *this;
-      }
-
-      inline point2d<T>& operator=(const Eigen::Vector2d& p)
-      {
-        x = static_cast<T>(p(0));
-        y = static_cast<T>(p(1));
-        return *this;
       }
 
       inline reference       operator()(const std::size_t& index)       { return ((0 == index)? x : y); }
@@ -181,7 +172,6 @@ namespace wykobi
       point3d() : x(T(0.0)), y(T(0.0)), z(T(0.0)){}
       point3d(T _x, T _y, T _z) : x(_x), y(_y), z(_z) {}
       point3d(const pointnd<T,3>& point) : x(point[0]), y(point[1]), z(point[2]){}
-      point3d(const Eigen::Vector3d& p) : x(static_cast<T>(p(0))), y(static_cast<T>(p(1))), z(static_cast<T>(p(2))) {}
      ~point3d(){}
 
       inline point3d<T>& operator=(const pointnd<T,3>& point)
@@ -190,14 +180,6 @@ namespace wykobi
          y = point[1];
          z = point[2];
          return *this;
-      }
-
-      inline point3d<T>& operator=(const Eigen::Vector3d& p)
-      {
-        x = static_cast<T>(p(0));
-        y = static_cast<T>(p(1));
-        z = static_cast<T>(p(2));
-        return *this;
       }
 
       inline reference       operator()(const std::size_t& index)       { return value(index); }
@@ -372,20 +354,6 @@ namespace wykobi
          calculate_norm();
       };
 
-      segment(const Eigen::Vector3d& p1, const Eigen::Vector3d& p2)
-      {
-         _data[0] = point3d<T>(p1);
-         _data[1] = point3d<T>(p2);
-         calculate_norm();
-      }
-
-      segment(const Eigen::Vector2d& p1, const Eigen::Vector2d& p2)
-      {
-         _data[0] = point2d<T>(p1);
-         _data[1] = point2d<T>(p2);
-         calculate_norm();
-      }
-
      ~segment(){}
 
    private:
@@ -432,19 +400,6 @@ namespace wykobi
          _data[0] = point1;
          _data[1] = point2;
       };
-
-      // FIXME: Dirty
-      line(const Eigen::Vector3d& p1, const Eigen::Vector3d& p2)
-      {
-         _data[0] = point3d<T>(p1);
-         _data[1] = point3d<T>(p2);
-      }
-
-      line(const Eigen::Vector2d& p1, const Eigen::Vector2d& p2)
-      {
-         _data[0] = point2d<T>(p1);
-         _data[1] = point2d<T>(p2);
-      }
 
       line(T x1, T y1, T x2, T y2) {
          _data[0] = point2d<T>(x1, y1);
@@ -774,7 +729,6 @@ namespace wykobi
    public:
 
       vector2d(const T& _x = T(0.0), const T& _y = T(0.0)) : point2d<T>(_x, _y) {}
-      vector2d(const Eigen::Vector2d& vec) : point2d<T> (vec) {}
       vector2d(const point2d<T>& p) : point2d<T>(p.x, p.y) {}
 
       inline vector2d<T>& operator=(const vectornd<T,2>& vec)
@@ -805,7 +759,6 @@ namespace wykobi
 
       vector3d(const T& _x = T(0.0), const T& _y = T(0.0), const T& _z = T(0.0)) : point3d<T>(_x, _y, _z) {}
       vector3d(const point3d<T>& p) : point3d<T>(p.x, p.y, p.z) {}
-      vector3d(const Eigen::Vector3d& vec) : point3d<T> (vec) {}
 
       inline vector3d<T>& operator=(const vectornd<T,3>& vec)
       {
@@ -894,12 +847,6 @@ namespace wykobi
    template <typename T>
    class define_vector_type<T,3> { public: typedef vector3d<T> VectorType; };
 
-   template <typename T, std::size_t Dimension>
-   class define_eigen_vector { public: typedef Eigen::Matrix<T,Dimension,1> EigenVector; };
-
-   template<> class define_eigen_vector<double,3> { public: typedef Eigen::Vector3d EigenVector; };
-   template<> class define_eigen_vector<double,2> { public: typedef Eigen::Vector2d EigenVector; };
-
    /************[        Ray Type       ]************/
    template <typename T, std::size_t Dimension>
    class ray : public geometric_entity
@@ -913,8 +860,6 @@ namespace wykobi
       ray(T x1, T y1, T z1, T x2, T y2, T z2) : origin(x1, y1, z1), direction(normalize(vector3d<T>(x2,y2,z2))) {};
       ray(const PointType& _or, const VectorType& _dir) : origin(_or), direction(normalize(_dir)) {};
       ray(const PointType& p1,  const PointType& p2) : origin(p1), direction(normalize(p2-p1)) {};
-      ray(const Eigen::Vector2d& _or, const Eigen::Vector2d& _dir) : origin(_or), direction(_dir) {};
-      ray(const Eigen::Vector3d& _or, const Eigen::Vector3d& _dir) : origin(_or), direction(_dir) {};
       ray();
      ~ray(){}
 
@@ -1401,11 +1346,6 @@ namespace wykobi
                          const point3d<T>& point3,
                          const point3d<T>& point4);
 
-   inline bool intersect(const Eigen::Vector3d& point1,
-                         const Eigen::Vector3d& point2,
-                         const Eigen::Vector3d& point3,
-                         const Eigen::Vector3d& point4);
-
    template <typename T>
    inline bool intersect(const segment<T,3>& segment1, const segment<T,3>&  segment2);
 
@@ -1567,11 +1507,6 @@ namespace wykobi
                                   const segment<T,3>& segment2,
                                   point3d<T> &point);
 
-   inline Eigen::Vector3d intersection_point(const Eigen::Vector3d& point1,
-                                             const Eigen::Vector3d& point2,
-                                             const Eigen::Vector3d& point3,
-                                             const Eigen::Vector3d& point4);
-
    template <typename T>
    inline point2d<T> intersection_point(const segment<T,2>& segment,
                                         const line<T,2>& line);
@@ -1579,11 +1514,6 @@ namespace wykobi
    template <typename T>
    inline point3d<T> intersection_point(const segment<T,3>& segment,
                                         const line<T,3>& line);
-   template <typename T>
-   inline bool intersection_point(const segment<T,3>& segment,
-                                        const line<T,3>& line,
-                                        Eigen::Vector3d& ipoint);
-
    /**
     * @brief Calculate the intersection point of a segment and a plane. If there is no intersction point
     *        or the line is in the plane, the function will return (+inf, +inf, +inf). This is different
@@ -4000,11 +3930,6 @@ namespace wykobi
 
    // no static check here
    // G = segment3d, Vector3d
-   template <typename T, class G> inline G translate(const Eigen::MatrixBase<T>& v, const G& geom);
-   // G = point3d or sphere
-   template <typename T, template<typename> class G> inline G<typename T::Scalar> translate(const Eigen::MatrixBase<T>& v, const G<typename T::Scalar>& geom);
-   // G = line, segment, triangle, quadix, box or polygon
-   template <typename T, template<typename, int> class G> inline G<typename T::Scalar, 3> translate(const Eigen::MatrixBase<T>& v, const G<typename T::Scalar, 3>& geom);
 
    template <typename T> inline point2d<T> scale(const T& dx, const T& dy, const point2d<T>& point);
    template <typename T> inline line<T,2> scale(const T& dx, const T& dy, const line<T,2>& line);
@@ -4257,9 +4182,6 @@ namespace wykobi
    template <typename T> inline point2d<T> make_point(const T& x, const T& y);
    template <typename T> inline point3d<T> make_point(const T& x, const T& y, const T& z);
 
-   inline point2d<double> make_point(const Eigen::Vector2d& v);
-   inline point3d<double> make_point(const Eigen::Vector3d& v);
-
    template <typename T> inline point2d<T> make_point(const point3d<T> point);
    template <typename T> inline point3d<T> make_point(const point2d<T> point, const T& z = T(0.0));
 
@@ -4284,11 +4206,6 @@ namespace wykobi
 
    template <typename T> inline ray<T,2> make_ray_with_points(const point2d<T>& point1, const point2d<T>& point2);
    template <typename T> inline ray<T,3> make_ray_with_points(const point3d<T>& point1, const point3d<T>& point2);
-   ray<double,2> make_ray_with_points(const Eigen::Vector2d& point1, const Eigen::Vector2d& point2);
-   ray<double,3> make_ray_with_points(const Eigen::Vector3d& point1, const Eigen::Vector3d& point2);
-
-   ray<double,2> make_ray(const Eigen::Vector2d& origin, const Eigen::Vector2d& direction);
-   ray<double,3> make_ray(const Eigen::Vector3d& origin, const Eigen::Vector3d& direction);
 
    template <typename T> inline curve_point<T,2> make_curve_point(const T& x, const T& y, const T& t);
    template <typename T> inline curve_point<T,3> make_curve_point(const T& x, const T& y, const T& z, const T& t);
@@ -4302,17 +4219,11 @@ namespace wykobi
    template <typename T> inline segment<T,2> make_segment(const point2d<T>& point1, const point2d<T>& point2);
    template <typename T> inline segment<T,3> make_segment(const point3d<T>& point1, const point3d<T>& point2);
 
-   inline segment<double,2> make_segment(const Eigen::Vector2d& v, const Eigen::Vector2d& w);
-   inline segment<double,3> make_segment(const Eigen::Vector3d& v, const Eigen::Vector3d& w);
-
    template <typename T> inline line<T,2> make_line(const T& x1, const T& y1, const T& x2, const T& y2);
    template <typename T> inline line<T,3> make_line(const T& x1, const T& y1, const T& z1, const T& x2, const T& y2, const T& z2);
 
    template <typename T> inline line<T,2> make_line(const point2d<T>& point1, const point2d<T>& point2);
    template <typename T> inline line<T,3> make_line(const point3d<T>& point1, const point3d<T>& point2);
-
-   inline line<double,2> make_line(const Eigen::Vector2d& v, const Eigen::Vector2d& w);
-   inline line<double,3> make_line(const Eigen::Vector3d& v, const Eigen::Vector3d& w);
 
    template <typename T> inline line<T,2> make_line(const segment<T,2>& segment);
    template <typename T> inline line<T,3> make_line(const segment<T,3>& segment);
@@ -4336,7 +4247,6 @@ namespace wykobi
 
    template <typename T> inline triangle<T,2> make_triangle(const point2d<T>& point1, const point2d<T>& point2, const point2d<T>& point3);
    template <typename T> inline triangle<T,3> make_triangle(const point3d<T>& point1, const point3d<T>& point2, const point3d<T>& point3);
-   template <typename T> inline triangle<typename T::Scalar, 3> make_triangle(const Eigen::MatrixBase<T>& point1, const Eigen::MatrixBase<T>& point2, const Eigen::MatrixBase<T>& point3);
    template <typename T, std::size_t Dimension>
    inline triangle<T, Dimension> make_triangle(const polygon<T, Dimension>& p, std::size_t i, std::size_t j, std::size_t k);
 
@@ -4352,7 +4262,6 @@ namespace wykobi
 
    template <typename T> inline quadix<T,2> make_quadix(const point2d<T>& point1, const point2d<T>& point2, const point2d<T>& point3, const point2d<T>& point4);
    template <typename T> inline quadix<T,3> make_quadix(const point3d<T>& point1, const point3d<T>& point2, const point3d<T>& point3, const point3d<T>& point4);
-   template <typename T> inline quadix<typename T::Scalar,3> make_quadix(const Eigen::MatrixBase<T>& point1, const Eigen::MatrixBase<T>& point2, const Eigen::MatrixBase<T>& point3, const Eigen::MatrixBase<T>& point4);
 
    template <typename T> inline quadix<T,2> make_quadix(const T& x1, const T& y1, const T& x2, const T& y2);
    template <typename T> inline quadix<T,2> make_quadix(const rectangle<T>& rectangle);
@@ -4396,7 +4305,6 @@ namespace wykobi
 
    template <typename T> inline polygon<T,2> make_polygon(const std::vector< point2d<T> >& point_list);
    template <typename T> inline polygon<T,3> make_polygon(const std::vector< point3d<T> >& point_list);
-   template <typename T> inline polygon<typename T::Scalar,3> make_polygon(const std::vector< Eigen::MatrixBase<T> >& point_list);
 
    template <typename T> inline polygon<T,2> make_polygon(const triangle<T,2>& triangle);
    template <typename T> inline polygon<T,2> make_polygon(const quadix<T,2>& quadix);

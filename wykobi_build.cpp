@@ -20,7 +20,6 @@
 // #include "Eigen/src/Core/Matrix.h"
 #include "wykobi.hpp"
 #include <iostream>
-#include "Eigen/Core"
 #include <iomanip>
 using namespace wykobi;
 int main(void) {

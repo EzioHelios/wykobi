@@ -1,7 +1,7 @@
 [
 {
-  "directory": "./",
-  "command": "/usr/bin/g++  -I/usr/include/eigen3 -I./include -g -o build/CMakeFiles/wykobi_build.dir/wykobi_build.cpp.o -c wykobi_build.cpp",
-  "file": "./wykobi_build.cpp"
+  "directory": "/home/hluo171851/Git/wykobi/build",
+  "command": "/opt/intel/oneapi/compiler/latest/linux/bin/intel64/icpc   -I/usr/include/eigen3 -I/home/hluo171851/Git/wykobi/include  -O0 -g   -o CMakeFiles/wykobi_build.dir/wykobi_build.cpp.o -c /home/hluo171851/Git/wykobi/wykobi_build.cpp",
+  "file": "/home/hluo171851/Git/wykobi/wykobi_build.cpp"
 }
 ]
